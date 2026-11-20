@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examen Multiple Choice — Ingeniería de Software</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">IS</span>
+        <div>
+          <p class="brand-eyebrow">Repaso integral · 7 apuntes</p>
+          <h1 class="brand-title">Examen Multiple Choice</h1>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          id="btn-history"
+          class="btn btn-ghost btn-sm"
+          aria-expanded="false"
+          aria-controls="history-panel"
+        >
+          Historial (<span id="history-count">0</span>)
+        </button>
+        <button
+          type="button"
+          id="btn-theme"
+          class="btn btn-ghost btn-sm"
+          aria-pressed="false"
+          aria-label="Cambiar entre tema claro y oscuro"
+        >
+          <span id="theme-label">Modo oscuro</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <main id="main-content" class="container main-content" tabindex="-1">
+    <!-- Panel colapsable de historial -->
+    <section id="history-panel" class="card history-panel" hidden aria-labelledby="history-heading">
+      <div class="panel-header">
+        <div>
+          <h2 id="history-heading">Historial de intentos y progreso</h2>
+          <p class="muted">Guardado localmente en tu navegador.</p>
+        </div>
+        <div class="panel-header-actions">
+          <button type="button" id="btn-reset-progress" class="btn btn-danger-outline btn-sm">
+            Reiniciar progreso
+          </button>
+          <button type="button" id="btn-close-history" class="btn btn-ghost btn-sm" aria-label="Cerrar historial">
+            Cerrar
+          </button>
+        </div>
+      </div>
+      <div id="history-list" class="history-list"></div>
+    </section>
+
+    <!-- VISTA 1: CONFIGURACIÓN -->
+    <section id="view-setup" class="view" aria-labelledby="setup-heading">
+      <div class="hero-card card">
+        <div class="hero-copy">
+          <h2 id="setup-heading">Repasá todos los temas para el parcial</h2>
+          <p>
+            Banco de <strong id="total-bank-count">100</strong> preguntas elaboradas directamente a partir de los 7 archivos PDF de la carpeta, con explicaciones detalladas y cita exacta de archivo y sección.
+          </p>
+        </div>
+        <dl class="hero-stats" aria-label="Estadísticas de tu estudio">
+          <div class="stat-pill">
+            <dt>Dominadas</dt>
+            <dd id="stat-mastered">0 / 100</dd>
+          </div>
+          <div class="stat-pill">
+            <dt>Por reforzar</dt>
+            <dd id="stat-missed">0</dd>
+          </div>
+          <div class="stat-pill">
+            <dt>Mejor nota</dt>
+            <dd id="stat-best">—</dd>
+          </div>
+        </dl>
+      </div>
+
+      <form id="setup-form" class="setup-grid" novalidate>
+        <!-- Selección de temas -->
+        <fieldset class="card fieldset-card topics-column">
+          <div class="section-head">
+            <legend class="section-legend">1. Elegí los temas a incluir</legend>
+            <div class="inline-actions">
+              <button type="button" id="btn-select-all" class="link-btn">Seleccionar todos</button>
+              <span aria-hidden="true">·</span>
+              <button type="button" id="btn-select-none" class="link-btn">Limpiar</button>
+            </div>
+          </div>
+
+          <div id="topics-container" class="topics-list"></div>
+          <p id="topic-error" class="form-error" role="alert" hidden>
+            Seleccioná al menos un tema para comenzar el examen.
+          </p>
+        </fieldset>
+
+        <!-- Configuración del examen -->
+        <div class="card config-column">
+          <h3 class="section-legend">2. Configurá la modalidad</h3>
+
+          <fieldset class="control-group">
+            <legend class="control-label">Modo de estudio</legend>
+            <div class="mode-grid" role="radiogroup" aria-label="Modo de estudio">
+              <label class="mode-card">
+                <input type="radio" name="mode" value="practice" checked>
+                <span class="mode-card-body">
+                  <strong>Práctica guiada</strong>
+                  <span>Corrección inmediata tras cada pregunta, con explicación y fuente del PDF.</span>
+                </span>
+              </label>
+
+              <label class="mode-card">
+                <input type="radio" name="mode" value="exam">
+                <span class="mode-card-body">
+                  <strong>Simulacro de parcial</strong>
+                  <span>Sin pistas hasta entregar, navegación libre, banderas de revisión y reloj opcional.</span>
+                </span>
+              </label>
+
+              <label class="mode-card" id="mode-mistakes-label">
+                <input type="radio" name="mode" value="mistakes" id="mode-mistakes-input">
+                <span class="mode-card-body">
+                  <strong>Repaso de errores <span id="mistakes-badge" class="badge-inline">0</span></strong>
+                  <span>Enfocate únicamente en las preguntas que respondiste mal en intentos previos.</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="two-col-controls">
+            <div class="control-group">
+              <label for="select-count" class="control-label">Cantidad de preguntas</label>
+              <select id="select-count" name="count" class="select-input">
+                <option value="10">10 preguntas (rápido)</option>
+                <option value="20" selected>20 preguntas (estándar)</option>
+                <option value="30">30 preguntas (completo)</option>
+                <option value="50">50 preguntas (intensivo)</option>
+                <option value="all">Todas las disponibles</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="select-difficulty" class="control-label">Nivel de dificultad</label>
+              <select id="select-difficulty" name="difficulty" class="select-input">
+                <option value="all" selected>Todos los niveles</option>
+                <option value="basica">Básica (conceptos clave)</option>
+                <option value="intermedia">Intermedia (comparaciones y matices)</option>
+                <option value="aplicada">Aplicada (casos prácticos y código)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="control-group" id="timer-group" hidden>
+            <label for="select-timer" class="control-label">Límite de tiempo (Simulacro)</label>
+            <select id="select-timer" name="timer" class="select-input">
+              <option value="0">Sin límite de tiempo</option>
+              <option value="15">15 minutos</option>
+              <option value="25" selected>25 minutos</option>
+              <option value="40">40 minutos</option>
+              <option value="60">60 minutos</option>
+            </select>
+          </div>
+
+          <div class="toggle-group">
+            <label class="checkbox-inline">
+              <input type="checkbox" id="chk-shuffle-questions" checked>
+              <span>Mezclar orden de preguntas</span>
+            </label>
+            <label class="checkbox-inline">
+              <input type="checkbox" id="chk-shuffle-options" checked>
+              <span>Mezclar orden de opciones (A–D)</span>
+            </label>
+          </div>
+
+          <div class="setup-footer">
+            <p class="availability-note" id="availability-note">
+              Disponibles según tu filtro: <strong>100</strong> preguntas.
+            </p>
+            <button type="submit" id="btn-start" class="btn btn-primary btn-lg">
+              Comenzar examen
+            </button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- VISTA 2: EXAMEN EN CURSO -->
+    <section id="view-quiz" class="view" hidden aria-labelledby="quiz-question-heading">
+      <div class="quiz-topbar card">
+        <div class="quiz-progress-meta">
+          <div class="quiz-meta-row">
+            <span id="quiz-mode-pill" class="pill pill-accent">Práctica guiada</span>
+            <span id="quiz-progress-text" class="progress-label">Pregunta 1 de 20</span>
+            <span id="quiz-timer" class="timer-badge" hidden aria-label="Tiempo restante">25:00</span>
+          </div>
+          <div
+            class="progress-track"
+            role="progressbar"
+            id="quiz-progressbar"
+            aria-label="Progreso del examen"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <div id="quiz-progress-fill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="quiz-topbar-actions">
+          <button type="button" id="btn-toggle-map" class="btn btn-ghost btn-sm" aria-expanded="false" aria-controls="question-map-panel">
+            Mapa (<span id="answered-count">0</span>/<span id="total-count">20</span>)
+          </button>
+          <button type="button" id="btn-exit-quiz" class="btn btn-ghost btn-sm">
+            Salir
+          </button>
+        </div>
+      </div>
+
+      <!-- Mapa rápido de preguntas -->
+      <nav id="question-map-panel" class="card question-map-panel" hidden aria-label="Navegación rápida de preguntas">
+        <div class="map-legend">
+          <span><i class="dot dot-current" aria-hidden="true"></i> Actual</span>
+          <span><i class="dot dot-answered" aria-hidden="true"></i> Respondida</span>
+          <span><i class="dot dot-flagged" aria-hidden="true"></i> Marcada</span>
+          <span id="legend-correct" hidden><i class="dot dot-correct" aria-hidden="true"></i> Correcta</span>
+          <span id="legend-wrong" hidden><i class="dot dot-wrong" aria-hidden="true"></i> Incorrecta</span>
+        </div>
+        <div id="question-map-grid" class="question-map-grid"></div>
+      </nav>
+
+      <!-- Tarjeta principal de pregunta -->
+      <article class="card question-card">
+        <div class="question-header">
+          <div class="question-tags">
+            <span id="q-topic-badge" class="pill pill-neutral">Tema</span>
+            <span id="q-difficulty-badge" class="pill pill-outline">Intermedia</span>
+          </div>
+          <button
+            type="button"
+            id="btn-flag"
+            class="btn btn-ghost btn-sm flag-btn"
+            aria-pressed="false"
+          >
+            <span aria-hidden="true">⚑</span> <span id="flag-label">Marcar para revisar</span>
+          </button>
+        </div>
+
+        <h2 id="quiz-question-heading" class="question-text"></h2>
+
+        <div id="q-code-wrapper" class="code-block-wrapper" hidden>
+          <div class="code-block-header">
+            <span id="q-code-lang" class="code-lang">código</span>
+          </div>
+          <pre class="code-block"><code id="q-code-content"></code></pre>
+        </div>
+
+        <div id="q-options" class="options-list" role="radiogroup" aria-labelledby="quiz-question-heading"></div>
+
+        <!-- Feedback inmediato en modo práctica -->
+        <div id="q-feedback" class="feedback-box" hidden aria-live="polite">
+          <div class="feedback-head">
+            <strong id="feedback-status"></strong>
+            <span id="feedback-source" class="source-tag"></span>
+          </div>
+          <p id="feedback-explanation"></p>
+        </div>
+
+        <div class="question-footer">
+          <div class="nav-buttons-left">
+            <button type="button" id="btn-prev" class="btn btn-secondary">
+              ← Anterior
+            </button>
+          </div>
+
+          <p class="kbd-hint" aria-hidden="true">
+            Atajos: <kbd>1</kbd>–<kbd>4</kbd> elegir · <kbd>←</kbd>/<kbd>→</kbd> navegar · <kbd>Enter</kbd> siguiente · <kbd>F</kbd> marcar
+          </p>
+
+          <div class="nav-buttons-right">
+            <button type="button" id="btn-next" class="btn btn-primary">
+              Siguiente →
+            </button>
+            <button type="button" id="btn-finish" class="btn btn-success" hidden>
+              Finalizar y corregir
+            </button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- VISTA 3: RESULTADOS Y REVISIÓN -->
+    <section id="view-results" class="view" hidden aria-labelledby="results-heading">
+      <div class="card results-hero">
+        <div class="results-score-box">
+          <div id="results-ring" class="score-ring" aria-hidden="true">
+            <span id="results-percent">0%</span>
+          </div>
+          <div>
+            <p id="results-verdict" class="verdict-eyebrow">Resultado del examen</p>
+            <h2 id="results-heading" class="results-title">Resumen de desempeño</h2>
+            <p id="results-summary-text" class="muted"></p>
+          </div>
+        </div>
+
+        <dl class="results-kpis">
+          <div class="kpi-item">
+            <dt>Aciertos</dt>
+            <dd id="kpi-correct">0 / 0</dd>
+          </div>
+          <div class="kpi-item">
+            <dt>Nota (0–10)</dt>
+            <dd id="kpi-grade">0,0</dd>
+          </div>
+          <div class="kpi-item">
+            <dt>Tiempo</dt>
+            <dd id="kpi-time">00:00</dd>
+          </div>
+          <div class="kpi-item">
+            <dt>Sin responder</dt>
+            <dd id="kpi-unanswered">0</dd>
+          </div>
+        </dl>
+
+        <div class="results-actions">
+          <button type="button" id="btn-retry-mistakes" class="btn btn-primary" hidden>
+            Repasar solo los errores (<span id="retry-mistakes-count">0</span>)
+          </button>
+          <button type="button" id="btn-new-same" class="btn btn-secondary">
+            Nuevo examen con esta configuración
+          </button>
+          <button type="button" id="btn-back-setup" class="btn btn-ghost">
+            Volver a configurar
+          </button>
+        </div>
+      </div>
+
+      <div class="card breakdown-card">
+        <h3>Desempeño por tema</h3>
+        <div id="topic-breakdown" class="breakdown-list"></div>
+      </div>
+
+      <div class="card review-card">
+        <div class="review-header">
+          <div>
+            <h3>Revisión detallada de preguntas</h3>
+            <p class="muted">Cada pregunta incluye su explicación y la referencia al PDF correspondiente.</p>
+          </div>
+          <div class="filter-tabs" role="tablist" aria-label="Filtrar preguntas revisadas">
+            <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">Todas</button>
+            <button type="button" class="filter-tab" data-filter="wrong" role="tab" aria-selected="false">Incorrectas</button>
+            <button type="button" class="filter-tab" data-filter="correct" role="tab" aria-selected="false">Correctas</button>
+            <button type="button" class="filter-tab" data-filter="flagged" role="tab" aria-selected="false">Marcadas</button>
+          </div>
+        </div>
+        <div id="review-list" class="review-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>
+        Basado en los 7 apuntes de cátedra de la carpeta · Funciona 100 % offline · Diseñado siguiendo pautas WCAG 2.2 AA.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Carga secuencial de datos (compatible con file:// sin servidor) -->
+  <script src="assets/data/tema1.js"></script>
+  <script src="assets/data/tema2.js"></script>
+  <script src="assets/data/tema3.js"></script>
+  <script src="assets/data/tema4.js"></script>
+  <script src="assets/questions.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
